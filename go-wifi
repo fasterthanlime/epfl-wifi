@@ -1,0 +1,14 @@
+KERNEL_MODULE=iwlagn
+WIRELESS_IF=wlan0
+
+if [[ $(pgrep wpa_supplicant) == "" ]]; then
+  sudo modprobe ${KERNEL_MODULE}
+  sudo ifconfig ${WIRELESS_IF} up
+  sudo $(wpa_supplicant | tail -1) &
+else
+  sudo wpa_cli reassociate
+fi
+
+if [[ ! -e /var/run/dhcpcd-${WIRELESS_IF}.pid ]]; then
+  sudo dhcpcd ${WIRELESS_IF} -A -t 0 -b
+fi

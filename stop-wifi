@@ -1,0 +1,4 @@
+WIRELESS_IF=wlan0
+
+sudo dhcpcd -k ${WIRELESS_IF}
+sudo killall wpa_supplicant
