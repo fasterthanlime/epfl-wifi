@@ -1,8 +1,10 @@
 WIRELESS_IF=wlan0
-
 if [ $(whoami) != root ]; then
-	echo You must run this script as root 1>&2
-	exit 2
+         echo You must run this script as root 1>&2
+         exit 2
+elif [ $(sudo -v &> /dev/null) ]; then#sudo exist
+        sudo "$@"
+         exit 0;
 fi
 
 dhcpcd -k ${WIRELESS_IF}
