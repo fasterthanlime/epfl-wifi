@@ -1,14 +1,23 @@
 KERNEL_MODULE=iwlagn
 WIRELESS_IF=wlan0
+WPA_CONF=/etc/wpa_supplicant/wpa_supplicant.conf
 
-if [[ $(pgrep wpa_supplicant) == "" ]]; then
-  sudo modprobe ${KERNEL_MODULE}
-  sudo ifconfig ${WIRELESS_IF} up
-  sudo $(wpa_supplicant | tail -1) &
+if [ $(whoami) != root ]; then
+	echo You must run this script as root 1>&2
+	exit 2
+fi
+
+if [ -z $(pgrep wpa_supplicant) ]; then
+  if [[ -n $(lsmod | grep ${KERNEL_MODULE} -m1) ]]; then 
+	echo "loading module" ${KERNEL_MODULE}
+	modprobe ${KERNEL_MODULE} #load the module is needed
+  fi
+  ifconfig ${WIRELESS_IF} up
+  wpa_supplicant -Dwext -i${WIRELESS_IF} -c${WPA_CONF} &
 else
-  sudo wpa_cli reassociate
+  wpa_cli reassociate
 fi
 
 if [[ ! -e /var/run/dhcpcd-${WIRELESS_IF}.pid ]]; then
-  sudo dhcpcd ${WIRELESS_IF} -A -t 0 -b
+  dhcpcd ${WIRELESS_IF} -A -t 0 -b
 fi

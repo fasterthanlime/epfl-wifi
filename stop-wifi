@@ -1,4 +1,11 @@
 WIRELESS_IF=wlan0
 
-sudo dhcpcd -k ${WIRELESS_IF}
-sudo killall wpa_supplicant
+if [ $(whoami) != root ]; then
+	echo You must run this script as root 1>&2
+	exit 2
+fi
+
+dhcpcd -k ${WIRELESS_IF}
+killall wpa_supplicant
+echo Turning off ${WIRELESS_IF}
+ifconfig ${WIRELESS_IF} down
